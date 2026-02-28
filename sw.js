@@ -6,7 +6,7 @@ self.addEventListener("install", function (event) {
       return cache.addAll([
         "./",
         "./index.html",
-        "./manifest.webmanifest"
+        "./manifest.json"
       ]);
     })
   );
@@ -18,4 +18,5 @@ self.addEventListener("fetch", function (event) {
       return response || fetch(event.request);
     })
   );
+
 });

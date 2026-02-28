@@ -1,0 +1,8 @@
+{
+  "name": "AuCarbon Column",
+  "short_name": "AuColumn",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070b16",
+  "theme_color": "#070b16"
+}

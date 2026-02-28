@@ -1,0 +1,1386 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AuCarbon Column — حساب ترسيب الذهب على الكربون</title>
+  <style>
+    :root{
+      --bg:#070b16; --card:#0e1630; --muted:#9aa4b2; --text:#e5e7eb;
+      --line:#21305a; --accent:#f7c948; --good:#3ddc97; --warn:#fbbf24; --bad:#fb7185;
+      --btn:#14224b;
+      --shadow: 0 14px 34px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans Arabic", "Tahoma", sans-serif;
+      background: radial-gradient(1200px 900px at 70% 10%, rgba(247,201,72,.08), transparent 55%),
+                  radial-gradient(1000px 700px at 10% 30%, rgba(61,220,151,.06), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    header{
+      position:sticky; top:0; z-index:20;
+      backdrop-filter: blur(10px);
+      background: rgba(7,11,22,.78);
+      border-bottom:1px solid rgba(255,255,255,.06);
+      padding:14px 14px 10px;
+    }
+    .title{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+    }
+    .logo{
+      width:38px; height:38px; border-radius:12px;
+      background: linear-gradient(135deg, rgba(247,201,72,.22), rgba(61,220,151,.14));
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      display:grid; place-items:center;
+      font-weight:800; color:var(--accent);
+    }
+    .brand h1{margin:0; font-size:16px; line-height:1.2}
+    .brand p{margin:2px 0 0; font-size:12px; color:var(--muted)}
+    .top-actions{display:flex; gap:8px; align-items:center}
+    .icon-btn{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(20,34,75,.7);
+      color:var(--text);
+      border-radius:12px;
+      padding:10px 12px;
+      cursor:pointer;
+    }
+    .wrap{max-width:1100px; margin:0 auto; padding:14px}
+    .tabs{
+      display:flex; gap:8px; margin-top:10px; overflow:auto; padding-bottom:6px;
+    }
+    .tab{
+      flex:0 0 auto;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(14,22,48,.55);
+      color:var(--text);
+      border-radius:999px;
+      padding:10px 14px;
+      cursor:pointer;
+      font-size:13px;
+      transition:.15s transform, .15s background;
+      user-select:none;
+    }
+    .tab.active{
+      background: rgba(247,201,72,.12);
+      border-color: rgba(247,201,72,.35);
+      transform: translateY(-1px);
+    }
+
+    .grid{display:grid; gap:12px}
+    @media (min-width: 860px){
+      .grid-2{grid-template-columns: 1.15fr .85fr}
+      .grid-3{grid-template-columns: 1fr 1fr 1fr}
+    }
+    .card{
+      background: rgba(14,22,48,.72);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      padding:14px;
+      box-shadow: var(--shadow);
+    }
+    .card h2{
+      margin:0 0 10px;
+      font-size:14px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+    }
+    .hint{font-size:12px; color:var(--muted); margin-top:6px}
+    .row{display:grid; gap:10px}
+    @media(min-width: 560px){
+      .row.cols-2{grid-template-columns: 1fr 1fr}
+      .row.cols-3{grid-template-columns: 1fr 1fr 1fr}
+    }
+    label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
+    input, select{
+      width:100%;
+      padding:12px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(7,11,22,.35);
+      color: var(--text);
+      outline:none;
+    }
+    input:focus, select:focus{border-color: rgba(247,201,72,.45)}
+    .btn{
+      width:100%;
+      padding:12px 14px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(20,34,75,.75);
+      color: var(--text);
+      cursor:pointer;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(247,201,72,.22), rgba(20,34,75,.85));
+      border-color: rgba(247,201,72,.25);
+    }
+    .btn.danger{background: rgba(251,113,133,.18); border-color: rgba(251,113,133,.35)}
+    .btn.ghost{background: transparent}
+    .results{
+      display:grid; gap:10px;
+    }
+    .kpi{
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,11,22,.28);
+    }
+    .kpi .name{font-size:12px; color: var(--muted)}
+    .kpi .val{font-size:16px; font-weight:800}
+    .pill{
+      padding:6px 10px; border-radius: 999px; font-size:12px; font-weight:700;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(7,11,22,.22);
+    }
+    .pill.good{border-color: rgba(61,220,151,.35); background: rgba(61,220,151,.10); color: var(--good)}
+    .pill.warn{border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.10); color: var(--warn)}
+    .pill.bad{border-color: rgba(251,113,133,.35); background: rgba(251,113,133,.10); color: var(--bad)}
+    table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,11,22,.22);
+    }
+    th, td{
+      padding:10px 8px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      font-size:12px;
+      text-align:center;
+      white-space:nowrap;
+    }
+    th{color:var(--muted); font-weight:700}
+    tr:last-child td{border-bottom:none}
+    .split{
+      display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between
+    }
+    .small{font-size:12px; color:var(--muted)}
+    .chart{
+      width:100%; height:220px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,11,22,.22);
+      padding:10px;
+    }
+    .footer-space{height:18px}
+    .toast{
+      position: fixed; left: 14px; bottom: 14px;
+      padding: 12px 14px; border-radius: 14px;
+      background: rgba(14,22,48,.92);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      opacity:0; transform: translateY(8px);
+      transition: .2s;
+      font-size: 13px;
+      z-index: 50;
+    }
+    .toast.show{opacity:1; transform: translateY(0)}
+    .modal{
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center;
+      padding:14px;
+      z-index: 80;
+    }
+    .modal .inner{
+      width:min(720px, 96vw);
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(14,22,48,.92);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .modal.show{display:flex}
+    .modal h3{margin:0 0 10px; font-size:14px}
+    .modal .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+  </style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <div class="brand">
+      <div class="logo">Au</div>
+      <div>
+        <h1>AuCarbon Column</h1>
+        <p>حساب ترسيب الذهب (ppm) على كربون الكولوم + قراءات الشفت</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="btnSettings">⚙️ إعدادات</button>
+      <button class="icon-btn" id="btnBackup">⬇️ تصدير/نسخ</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-view="quick">حساب سريع</div>
+    <div class="tab" data-view="log">قراءات الشفت</div>
+    <div class="tab" data-view="breakthrough">Breakthrough</div>
+    <div class="tab" data-view="report">تقرير</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- QUICK -->
+  <section class="view" id="view-quick">
+    <div class="grid grid-2">
+      <div class="card">
+        <h2>الإدخالات</h2>
+
+        <div class="row cols-3">
+          <div>
+            <label>اسم الكولوم</label>
+            <select id="qColumn"></select>
+            <div class="hint">تقدر تضيف كولومات من الإعدادات.</div>
+          </div>
+          <div>
+            <label>التاريخ/الوقت</label>
+            <input id="qDatetime" type="datetime-local" />
+          </div>
+          <div>
+            <label>زمن التشغيل t (ساعة)</label>
+            <input id="qHours" type="number" step="0.01" min="0" value="1" />
+          </div>
+        </div>
+
+        <div class="row cols-3" style="margin-top:10px">
+          <div>
+            <label>معدل التدفق Q</label>
+            <input id="qFlow" type="number" step="0.001" min="0" placeholder="مثال: 20" />
+          </div>
+          <div>
+            <label>وحدة التدفق</label>
+            <select id="qFlowUnit">
+              <option value="m3h">m³/h</option>
+              <option value="lmin">L/min</option>
+            </select>
+          </div>
+          <div>
+            <label>كتلة الكربون M (kg)</label>
+            <input id="qCarbonKg" type="number" step="0.1" min="0" placeholder="مثال: 500" />
+          </div>
+        </div>
+
+        <div class="row cols-2" style="margin-top:10px">
+          <div>
+            <label>C_in (ppm)</label>
+            <input id="qCin" type="number" step="0.0001" min="0" placeholder="مثال: 1.20" />
+          </div>
+          <div>
+            <label>C_out (ppm)</label>
+            <input id="qCout" type="number" step="0.0001" min="0" placeholder="مثال: 0.30" />
+          </div>
+        </div>
+
+        <div class="row cols-2" style="margin-top:12px">
+          <button class="btn primary" id="btnQuickCalc">احسب الآن</button>
+          <button class="btn" id="btnQuickSave">💾 حفظ كقراءة شفت</button>
+        </div>
+
+        <div class="hint">
+          افتراض التطبيق: <b>1 ppm ≈ 1 mg/L</b> للمحاليل المائية.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>النتائج</h2>
+        <div class="results" id="quickResults">
+          <div class="kpi"><div><div class="name">ΔC = C_in − C_out (ppm)</div></div><div class="val">—</div></div>
+          <div class="kpi"><div><div class="name">Au Captured (g)</div></div><div class="val">—</div></div>
+          <div class="kpi"><div><div class="name">Recovery (%)</div></div><div class="val">—</div></div>
+          <div class="kpi"><div><div class="name">Breakthrough = C_out / C_in</div></div><div class="val">—</div></div>
+          <div class="kpi"><div><div class="name">Loading (g/kg)</div></div><div class="val">—</div></div>
+        </div>
+
+        <div style="margin-top:12px" class="kpi">
+          <div>
+            <div class="name">حالة الكولوم (حسب حدود التنبيه)</div>
+            <div class="small">الأصفر/الأحمر قابل للتغيير من الإعدادات</div>
+          </div>
+          <div id="quickStatus" class="pill">—</div>
+        </div>
+
+        <div class="hint" id="unitNote"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOG -->
+  <section class="view" id="view-log" style="display:none">
+    <div class="grid grid-2">
+      <div class="card">
+        <h2>إضافة قراءة شفت</h2>
+
+        <div class="row cols-3">
+          <div>
+            <label>الكولوم</label>
+            <select id="lColumn"></select>
+          </div>
+          <div>
+            <label>الوقت</label>
+            <input id="lDatetime" type="datetime-local" />
+          </div>
+          <div>
+            <label>Q + الوحدة</label>
+            <div class="row cols-2">
+              <input id="lFlow" type="number" step="0.001" min="0" placeholder="Q" />
+              <select id="lFlowUnit">
+                <option value="m3h">m³/h</option>
+                <option value="lmin">L/min</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row cols-2" style="margin-top:10px">
+          <div>
+            <label>C_in (ppm)</label>
+            <input id="lCin" type="number" step="0.0001" min="0" />
+          </div>
+          <div>
+            <label>C_out (ppm)</label>
+            <input id="lCout" type="number" step="0.0001" min="0" />
+          </div>
+        </div>
+
+        <div class="row cols-2" style="margin-top:12px">
+          <button class="btn primary" id="btnAddReading">+ إضافة</button>
+          <button class="btn danger" id="btnClearShift">🗑️ مسح قراءات الكولوم (اليوم)</button>
+        </div>
+
+        <div class="hint">التجميع يتم تلقائياً: كل قراءة تمثل الفترة حتى القراءة التالية لنفس الكولوم.</div>
+      </div>
+
+      <div class="card">
+        <h2>ملخص الشفت (لنفس اليوم)</h2>
+        <div class="results" id="shiftSummary">
+          <div class="kpi"><div><div class="name">Total Au Captured (g)</div></div><div class="val">—</div></div>
+          <div class="kpi"><div><div class="name">Avg Recovery (%)</div></div><div class="val">—</div></div>
+          <div class="kpi"><div><div class="name">Avg ΔC (ppm)</div></div><div class="val">—</div></div>
+          <div class="kpi"><div><div class="name">Loading Added (g/kg) اليوم</div></div><div class="val">—</div></div>
+        </div>
+        <div style="margin-top:10px" class="kpi">
+          <div>
+            <div class="name">حالة اليوم (Breakthrough)</div>
+            <div class="small">مبني على متوسط C_out/C_in اليوم</div>
+          </div>
+          <div id="shiftStatus" class="pill">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="split">
+        <h2 style="margin:0">جدول القراءات (اليوم)</h2>
+        <div style="display:flex; gap:10px; flex-wrap:wrap">
+          <button class="btn" style="width:auto" id="btnExportTodayCsv">📄 تصدير CSV (اليوم)</button>
+          <button class="btn ghost" style="width:auto" id="btnDeleteSelected">حذف المحدد</button>
+        </div>
+      </div>
+      <div class="hint">حدد صفوف للحذف بوضع علامة ✓.</div>
+      <div style="overflow:auto; margin-top:10px">
+        <table id="readingsTable">
+          <thead>
+            <tr>
+              <th>✓</th>
+              <th>الوقت</th>
+              <th>Q</th>
+              <th>وحدة</th>
+              <th>C_in</th>
+              <th>C_out</th>
+              <th>ΔC</th>
+              <th>Rec%</th>
+              <th>BT</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- BREAKTHROUGH -->
+  <section class="view" id="view-breakthrough" style="display:none">
+    <div class="grid grid-2">
+      <div class="card">
+        <h2>مؤشرات Breakthrough</h2>
+
+        <div class="row cols-3">
+          <div class="kpi"><div><div class="name">آخر BT</div></div><div class="val" id="btLast">—</div></div>
+          <div class="kpi"><div><div class="name">BT متوسط اليوم</div></div><div class="val" id="btAvgToday">—</div></div>
+          <div class="kpi"><div><div class="name">الحالة</div></div><div class="val" id="btStateText">—</div></div>
+        </div>
+
+        <div style="margin-top:12px" class="kpi">
+          <div>
+            <div class="name">الكولوم</div>
+          </div>
+          <select id="btColumn"></select>
+        </div>
+
+        <div class="hint">الرسم يوضح BT = C_out/C_in عبر الزمن (اليوم).</div>
+      </div>
+
+      <div class="card">
+        <h2>الرسم البياني</h2>
+        <div class="chart">
+          <canvas id="btCanvas" width="800" height="360" style="width:100%; height:100%"></canvas>
+        </div>
+        <div class="hint">بدون مكتبات—رسم مباشر على Canvas.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REPORT -->
+  <section class="view" id="view-report" style="display:none">
+    <div class="grid grid-2">
+      <div class="card">
+        <h2>تقرير</h2>
+        <div class="row cols-2">
+          <div>
+            <label>الكولوم</label>
+            <select id="rColumn"></select>
+          </div>
+          <div>
+            <label>نطاق الأيام (آخر N يوم)</label>
+            <input id="rDays" type="number" min="1" step="1" value="7" />
+          </div>
+        </div>
+
+        <div class="row cols-2" style="margin-top:12px">
+          <button class="btn primary" id="btnMakeReport">إنشاء التقرير</button>
+          <button class="btn" id="btnExportReportCsv">📄 تصدير CSV (التقرير)</button>
+        </div>
+
+        <div class="hint">التقرير يجمع Au الملتقط حسب الفترات بين القراءات.</div>
+      </div>
+
+      <div class="card">
+        <h2>نتائج التقرير</h2>
+        <div class="results" id="reportSummary">
+          <div class="kpi"><div><div class="name">Total Au (g)</div></div><div class="val">—</div></div>
+          <div class="kpi"><div><div class="name">Avg Recovery (%)</div></div><div class="val">—</div></div>
+          <div class="kpi"><div><div class="name">Avg ΔC (ppm)</div></div><div class="val">—</div></div>
+          <div class="kpi"><div><div class="name">Avg BT</div></div><div class="val">—</div></div>
+          <div class="kpi"><div><div class="name">Loading Added (g/kg)</div></div><div class="val">—</div></div>
+        </div>
+        <div style="margin-top:10px" class="kpi">
+          <div>
+            <div class="name">حالة التقرير</div>
+            <div class="small">حسب متوسط BT</div>
+          </div>
+          <div id="reportStatus" class="pill">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h2>تفاصيل الأيام</h2>
+      <div style="overflow:auto; margin-top:10px">
+        <table id="reportTable">
+          <thead>
+            <tr>
+              <th>اليوم</th>
+              <th>Au (g)</th>
+              <th>Avg Rec%</th>
+              <th>Avg ΔC</th>
+              <th>Avg BT</th>
+              <th>#Readings</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="hint">لو اليوم فيه قراءة واحدة فقط، Au اليوم يكون 0 لأنه ما في فترة زمنية كفاية للحساب.</div>
+    </div>
+  </section>
+
+  <div class="footer-space"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal" id="settingsModal">
+  <div class="inner">
+    <div class="split">
+      <h3>⚙️ الإعدادات</h3>
+      <button class="icon-btn" id="btnCloseSettings">✕</button>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:10px">
+      <div class="card">
+        <h2>حدود التنبيه (Breakthrough)</h2>
+        <div class="row cols-2">
+          <div>
+            <label>حد أصفر (مثلاً 0.05)</label>
+            <input id="sWarn" type="number" step="0.001" min="0" value="0.05">
+          </div>
+          <div>
+            <label>حد أحمر (مثلاً 0.20)</label>
+            <input id="sBad" type="number" step="0.001" min="0" value="0.20">
+          </div>
+        </div>
+        <div class="hint">الحالة تعتمد على BT = C_out/C_in.</div>
+      </div>
+
+      <div class="card">
+        <h2>الكولومات</h2>
+        <div class="row cols-2">
+          <div>
+            <label>اسم كولوم جديد</label>
+            <input id="sNewColName" placeholder="مثال: Column A">
+          </div>
+          <div>
+            <label>كتلة الكربون (kg)</label>
+            <input id="sNewColCarbon" type="number" step="0.1" min="0" placeholder="مثال: 500">
+          </div>
+        </div>
+        <div class="row cols-2" style="margin-top:10px">
+          <div>
+            <label>Loading ابتدائي (g/kg) (اختياري)</label>
+            <input id="sNewColInitLoading" type="number" step="0.1" min="0" placeholder="مثال: 0">
+          </div>
+          <div>
+            <label>Target Loading (g/kg) (اختياري)</label>
+            <input id="sNewColTarget" type="number" step="0.1" min="0" placeholder="مثال: 2500">
+          </div>
+        </div>
+        <div class="row cols-2" style="margin-top:10px">
+          <button class="btn primary" id="btnAddColumn">+ إضافة كولوم</button>
+          <button class="btn danger" id="btnDeleteColumn">🗑️ حذف الكولوم المحدد</button>
+        </div>
+        <div class="hint">الحذف يمسح بيانات هذا الكولوم فقط.</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btnSaveSettings" style="width:auto">حفظ</button>
+      <button class="btn ghost" id="btnResetAll" style="width:auto">إعادة ضبط كل البيانات</button>
+    </div>
+  </div>
+</div>
+
+<!-- BACKUP MODAL -->
+<div class="modal" id="backupModal">
+  <div class="inner">
+    <div class="split">
+      <h3>⬇️ تصدير/نسخ البيانات</h3>
+      <button class="icon-btn" id="btnCloseBackup">✕</button>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <h2>نسخ احتياطي JSON</h2>
+      <div class="hint">اضغط "نسخ" ثم احفظه في ملاحظاتك. وللاسترجاع: الصق JSON ثم "استرجاع".</div>
+      <textarea id="backupText" style="width:100%; height:180px; margin-top:10px; border-radius:14px; padding:12px; border:1px solid rgba(255,255,255,.12); background: rgba(7,11,22,.35); color: var(--text)"></textarea>
+      <div class="actions">
+        <button class="btn" id="btnCopyBackup" style="width:auto">نسخ</button>
+        <button class="btn primary" id="btnLoadBackup" style="width:auto">استرجاع</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ====== Storage Keys ======
+  const KEY = "aucarbon_v1";
+
+  // ====== Helpers ======
+  const $ = (id)=>document.getElementById(id);
+  const pad2 = (n)=> String(n).padStart(2,"0");
+
+  function nowLocalDatetimeValue(){
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = pad2(d.getMonth()+1);
+    const dd = pad2(d.getDate());
+    const hh = pad2(d.getHours());
+    const mi = pad2(d.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+  }
+
+  function toast(msg){
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"), 2200);
+  }
+
+  function safeNum(x){
+    const n = Number(x);
+    return Number.isFinite(n) ? n : NaN;
+  }
+
+  function flowToM3h(flow, unit){
+    // m3/h stays, L/min -> m3/h
+    if(unit === "m3h") return flow;
+    // L/min * 60 min/h = L/h; /1000 = m3/h
+    return flow * 60 / 1000;
+  }
+
+  function computeAuCapturedG(flowValue, flowUnit, cin, cout, hours){
+    const Qm3h = flowToM3h(flowValue, flowUnit);
+    const dC = (cin - cout);
+    // Au(g) = Q(m3/h) * dC(ppm ~ mg/L) * t(h)
+    return Qm3h * dC * hours;
+  }
+
+  function computeRecovery(cin, cout){
+    if(cin <= 0) return NaN;
+    return ((cin - cout) / cin) * 100;
+  }
+
+  function computeBT(cin, cout){
+    if(cin <= 0) return NaN;
+    return cout / cin;
+  }
+
+  function statusFromBT(bt, warn, bad){
+    if(!Number.isFinite(bt)) return {label:"—", cls:""};
+    if(bt >= bad) return {label:"أحمر (قرب شبع)", cls:"bad"};
+    if(bt >= warn) return {label:"أصفر (اختراق)", cls:"warn"};
+    return {label:"أخضر (ممتاز)", cls:"good"};
+  }
+
+  function ymd(date){
+    // local date parts
+    const d = new Date(date);
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  }
+
+  function downloadText(filename, text){
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function toCsv(rows){
+    const esc = (v)=>{
+      const s = String(v ?? "");
+      if(s.includes(",") || s.includes('"') || s.includes("\n")) return `"${s.replaceAll('"','""')}"`;
+      return s;
+    };
+    return rows.map(r => r.map(esc).join(",")).join("\n");
+  }
+
+  // ====== State ======
+  let state = {
+    settings: { warnBT: 0.05, badBT: 0.20 },
+    columns: [
+      { id: cryptoRandomId(), name: "Column A", carbonKg: 500, initLoadingGkg: 0, targetLoadingGkg: 2500 }
+    ],
+    readings: [] // {id, columnId, dtISO, flow, flowUnit, cin, cout}
+  };
+
+  function cryptoRandomId(){
+    // simple id
+    return Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2);
+  }
+
+  function load(){
+    const raw = localStorage.getItem(KEY);
+    if(!raw) { save(); return; }
+    try{
+      const obj = JSON.parse(raw);
+      if(obj && obj.columns && obj.settings && obj.readings){
+        state = obj;
+      }
+    }catch(e){}
+  }
+
+  function save(){
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }
+
+  // ====== UI Populate ======
+  function populateColumns(){
+    const selects = ["qColumn","lColumn","btColumn","rColumn"];
+    for(const sid of selects){
+      const sel = $(sid);
+      sel.innerHTML = "";
+      state.columns.forEach(c=>{
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = `${c.name} — كربون ${c.carbonKg ?? "؟"} kg`;
+        sel.appendChild(opt);
+      });
+    }
+
+    // set carbon kg for quick based on selection
+    syncQuickCarbonFromColumn();
+    refreshAllViews();
+  }
+
+  function syncQuickCarbonFromColumn(){
+    const colId = $("qColumn").value;
+    const col = state.columns.find(c=>c.id===colId);
+    if(col && Number.isFinite(Number(col.carbonKg))){
+      $("qCarbonKg").value = col.carbonKg;
+    }
+  }
+
+  // ====== Views Switch ======
+  function setView(view){
+    document.querySelectorAll(".tab").forEach(t=>{
+      t.classList.toggle("active", t.dataset.view === view);
+    });
+    document.querySelectorAll(".view").forEach(v=>v.style.display="none");
+    $(`view-${view}`).style.display = "block";
+    refreshAllViews();
+  }
+
+  // ====== Quick Calc ======
+  function runQuickCalc(){
+    const flow = safeNum($("qFlow").value);
+    const unit = $("qFlowUnit").value;
+    const hours = safeNum($("qHours").value);
+    const cin = safeNum($("qCin").value);
+    const cout = safeNum($("qCout").value);
+    const carbonKg = safeNum($("qCarbonKg").value);
+
+    if(!Number.isFinite(flow) || !Number.isFinite(hours) || !Number.isFinite(cin) || !Number.isFinite(cout)){
+      toast("أكمل البيانات (Q, t, C_in, C_out).");
+      return null;
+    }
+    const dC = cin - cout;
+    const auG = computeAuCapturedG(flow, unit, cin, cout, hours);
+    const rec = computeRecovery(cin, cout);
+    const bt = computeBT(cin, cout);
+    const loading = (Number.isFinite(carbonKg) && carbonKg>0) ? (auG / carbonKg) : NaN;
+
+    const warn = Number(state.settings.warnBT);
+    const bad = Number(state.settings.badBT);
+    const st = statusFromBT(bt, warn, bad);
+
+    const res = $("quickResults").querySelectorAll(".kpi .val");
+    res[0].textContent = Number.isFinite(dC) ? dC.toFixed(4) : "—";
+    res[1].textContent = Number.isFinite(auG) ? auG.toFixed(2) : "—";
+    res[2].textContent = Number.isFinite(rec) ? rec.toFixed(2) : "—";
+    res[3].textContent = Number.isFinite(bt) ? bt.toFixed(4) : "—";
+    res[4].textContent = Number.isFinite(loading) ? loading.toFixed(4) : "—";
+
+    const pill = $("quickStatus");
+    pill.className = `pill ${st.cls}`;
+    pill.textContent = st.label;
+
+    const note = $("unitNote");
+    const Qm3h = flowToM3h(flow, unit);
+    note.textContent = `تم تحويل التدفق إلى m³/h = ${Number.isFinite(Qm3h) ? Qm3h.toFixed(4) : "—"} ، ثم Au(g) = Q(m³/h) × ΔC(ppm) × t(h).`;
+
+    return {flow, unit, hours, cin, cout, carbonKg, dC, auG, rec, bt, loading};
+  }
+
+  function saveQuickAsReading(){
+    const colId = $("qColumn").value;
+    const dt = $("qDatetime").value || nowLocalDatetimeValue();
+    const flow = safeNum($("qFlow").value);
+    const unit = $("qFlowUnit").value;
+    const cin = safeNum($("qCin").value);
+    const cout = safeNum($("qCout").value);
+
+    if(!colId) return toast("اختر الكولوم.");
+    if(!Number.isFinite(flow) || !Number.isFinite(cin) || !Number.isFinite(cout)) return toast("أدخل Q و C_in و C_out.");
+
+    state.readings.push({
+      id: cryptoRandomId(),
+      columnId: colId,
+      dtISO: new Date(dt).toISOString(),
+      flow, flowUnit: unit, cin, cout
+    });
+    save();
+    toast("تم حفظ القراءة ✅");
+    refreshAllViews();
+  }
+
+  // ====== Readings & Aggregation ======
+  function getReadingsForDay(columnId, dayYmd){
+    return state.readings
+      .filter(r=>r.columnId===columnId && ymd(r.dtISO)===dayYmd)
+      .sort((a,b)=> new Date(a.dtISO)-new Date(b.dtISO));
+  }
+
+  function computeIntervals(readings){
+    // returns array of {from,to,dtHours, flow,unit,cin,cout, dC, rec, bt, auG}
+    const out = [];
+    for(let i=0; i<readings.length; i++){
+      const r = readings[i];
+      const cin = r.cin, cout = r.cout;
+      const dC = cin - cout;
+      const rec = computeRecovery(cin, cout);
+      const bt = computeBT(cin, cout);
+
+      let dtHours = 0;
+      if(i < readings.length-1){
+        const t0 = new Date(r.dtISO).getTime();
+        const t1 = new Date(readings[i+1].dtISO).getTime();
+        dtHours = Math.max(0, (t1 - t0) / 3600000);
+      }
+      const auG = (dtHours>0) ? computeAuCapturedG(r.flow, r.flowUnit, cin, cout, dtHours) : 0;
+
+      out.push({from:r.dtISO, to: readings[i+1]?.dtISO ?? null, dtHours, flow:r.flow, unit:r.flowUnit, cin, cout, dC, rec, bt, auG, id:r.id});
+    }
+    return out;
+  }
+
+  function summarizeIntervals(intervals, carbonKg){
+    const totalAu = intervals.reduce((s,x)=> s + (Number.isFinite(x.auG)?x.auG:0), 0);
+    const avgRec = avg(intervals.map(x=>x.rec));
+    const avgDC  = avg(intervals.map(x=>x.dC));
+    const avgBT  = avg(intervals.map(x=>x.bt));
+    const loadingAdded = (Number.isFinite(carbonKg) && carbonKg>0) ? totalAu / carbonKg : NaN;
+    return {totalAu, avgRec, avgDC, avgBT, loadingAdded};
+  }
+
+  function avg(arr){
+    const v = arr.filter(Number.isFinite);
+    if(!v.length) return NaN;
+    return v.reduce((a,b)=>a+b,0)/v.length;
+  }
+
+  // ====== LOG view render ======
+  function renderTodayTable(){
+    const colId = $("lColumn").value || state.columns[0]?.id;
+    const day = ymd(new Date());
+    const readings = getReadingsForDay(colId, day);
+
+    // table
+    const tbody = $("readingsTable").querySelector("tbody");
+    tbody.innerHTML = "";
+    readings.forEach(r=>{
+      const dC = r.cin - r.cout;
+      const rec = computeRecovery(r.cin, r.cout);
+      const bt = computeBT(r.cin, r.cout);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input type="checkbox" data-id="${r.id}"></td>
+        <td>${formatLocal(r.dtISO)}</td>
+        <td>${num(r.flow,3)}</td>
+        <td>${r.flowUnit==="m3h" ? "m³/h" : "L/min"}</td>
+        <td>${num(r.cin,4)}</td>
+        <td>${num(r.cout,4)}</td>
+        <td>${num(dC,4)}</td>
+        <td>${num(rec,2)}</td>
+        <td>${num(bt,4)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // summary
+    const intervals = computeIntervals(readings);
+    const col = state.columns.find(c=>c.id===colId);
+    const carbonKg = Number(col?.carbonKg);
+    const sum = summarizeIntervals(intervals, carbonKg);
+
+    const boxes = $("shiftSummary").querySelectorAll(".kpi .val");
+    boxes[0].textContent = Number.isFinite(sum.totalAu) ? sum.totalAu.toFixed(2) : "—";
+    boxes[1].textContent = Number.isFinite(sum.avgRec) ? sum.avgRec.toFixed(2) : "—";
+    boxes[2].textContent = Number.isFinite(sum.avgDC) ? sum.avgDC.toFixed(4) : "—";
+    boxes[3].textContent = Number.isFinite(sum.loadingAdded) ? sum.loadingAdded.toFixed(4) : "—";
+
+    const warn = Number(state.settings.warnBT), bad = Number(state.settings.badBT);
+    const st = statusFromBT(sum.avgBT, warn, bad);
+    const pill = $("shiftStatus");
+    pill.className = `pill ${st.cls}`;
+    pill.textContent = st.label;
+  }
+
+  function formatLocal(iso){
+    const d = new Date(iso);
+    return `${pad2(d.getHours())}:${pad2(d.getMinutes())}  ${pad2(d.getDate())}/${pad2(d.getMonth()+1)}`;
+  }
+  function num(v, dp){
+    return Number.isFinite(v) ? Number(v).toFixed(dp) : "—";
+  }
+
+  function addReadingFromLogForm(){
+    const colId = $("lColumn").value;
+    const dt = $("lDatetime").value || nowLocalDatetimeValue();
+    const flow = safeNum($("lFlow").value);
+    const unit = $("lFlowUnit").value;
+    const cin = safeNum($("lCin").value);
+    const cout = safeNum($("lCout").value);
+
+    if(!Number.isFinite(flow) || !Number.isFinite(cin) || !Number.isFinite(cout)){
+      toast("أدخل Q و C_in و C_out.");
+      return;
+    }
+    state.readings.push({
+      id: cryptoRandomId(),
+      columnId: colId,
+      dtISO: new Date(dt).toISOString(),
+      flow, flowUnit: unit, cin, cout
+    });
+    save();
+    toast("تمت الإضافة ✅");
+    refreshAllViews();
+  }
+
+  function clearTodayForColumn(){
+    const colId = $("lColumn").value;
+    const day = ymd(new Date());
+    const before = state.readings.length;
+    state.readings = state.readings.filter(r=> !(r.columnId===colId && ymd(r.dtISO)===day));
+    save();
+    toast(`تم مسح ${before - state.readings.length} قراءة.`);
+    refreshAllViews();
+  }
+
+  function deleteSelectedRows(){
+    const checks = Array.from($("readingsTable").querySelectorAll("tbody input[type=checkbox]:checked"));
+    if(!checks.length) return toast("ما في صف محدد.");
+    const ids = new Set(checks.map(c=>c.dataset.id));
+    const before = state.readings.length;
+    state.readings = state.readings.filter(r=> !ids.has(r.id));
+    save();
+    toast(`تم حذف ${before - state.readings.length} صف.`);
+    refreshAllViews();
+  }
+
+  function exportTodayCsv(){
+    const colId = $("lColumn").value;
+    const col = state.columns.find(c=>c.id===colId);
+    const day = ymd(new Date());
+    const readings = getReadingsForDay(colId, day);
+
+    const rows = [
+      ["column","date","time","flow","flowUnit","cin_ppm","cout_ppm","deltaC_ppm","recovery_pct","breakthrough"]
+    ];
+    readings.forEach(r=>{
+      const d = new Date(r.dtISO);
+      const date = `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+      const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+      const dC = r.cin - r.cout;
+      const rec = computeRecovery(r.cin, r.cout);
+      const bt = computeBT(r.cin, r.cout);
+      rows.push([
+        col?.name ?? "Column",
+        date, time,
+        r.flow, r.flowUnit,
+        r.cin, r.cout,
+        dC, rec, bt
+      ]);
+    });
+
+    downloadText(`aucarbon_${(col?.name??"column").replaceAll(" ","_")}_${day}.csv`, toCsv(rows));
+  }
+
+  // ====== Breakthrough view ======
+  function renderBreakthrough(){
+    const colId = $("btColumn").value;
+    const day = ymd(new Date());
+    const readings = getReadingsForDay(colId, day);
+    const bts = readings.map(r=>computeBT(r.cin,r.cout)).filter(Number.isFinite);
+    const last = bts.length ? bts[bts.length-1] : NaN;
+    const avgToday = avg(bts);
+
+    const warn = Number(state.settings.warnBT), bad = Number(state.settings.badBT);
+    const st = statusFromBT(avgToday, warn, bad);
+
+    $("btLast").textContent = Number.isFinite(last) ? last.toFixed(4) : "—";
+    $("btAvgToday").textContent = Number.isFinite(avgToday) ? avgToday.toFixed(4) : "—";
+    $("btStateText").textContent = st.label;
+
+    drawBTChart(readings, warn, bad);
+  }
+
+  function drawBTChart(readings, warn, bad){
+    const canvas = $("btCanvas");
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+
+    // Background
+    ctx.fillStyle = "rgba(7,11,22,.35)";
+    ctx.fillRect(0,0,W,H);
+
+    // grid
+    ctx.strokeStyle = "rgba(255,255,255,.06)";
+    ctx.lineWidth = 1;
+    for(let i=0;i<=5;i++){
+      const y = 20 + i*(H-60)/5;
+      ctx.beginPath(); ctx.moveTo(60,y); ctx.lineTo(W-20,y); ctx.stroke();
+    }
+    for(let i=0;i<=6;i++){
+      const x = 60 + i*(W-90)/6;
+      ctx.beginPath(); ctx.moveTo(x,20); ctx.lineTo(x,H-40); ctx.stroke();
+    }
+
+    // axes
+    ctx.strokeStyle = "rgba(255,255,255,.12)";
+    ctx.beginPath(); ctx.moveTo(60,20); ctx.lineTo(60,H-40); ctx.lineTo(W-20,H-40); ctx.stroke();
+
+    // labels
+    ctx.fillStyle = "rgba(229,231,235,.9)";
+    ctx.font = "12px system-ui";
+    ctx.fillText("BT = C_out/C_in", 70, 16);
+
+    // compute points
+    const points = readings.map(r=>{
+      const bt = computeBT(r.cin,r.cout);
+      return { t: new Date(r.dtISO).getTime(), bt };
+    }).filter(p=>Number.isFinite(p.bt));
+
+    if(points.length < 2){
+      ctx.fillStyle = "rgba(154,164,178,.9)";
+      ctx.fillText("لا توجد نقاط كافية للرسم (احتاج قراءتين على الأقل).", 70, H/2);
+      drawThresholds(ctx, W, H, warn, bad);
+      return;
+    }
+
+    const tMin = Math.min(...points.map(p=>p.t));
+    const tMax = Math.max(...points.map(p=>p.t));
+    const btMax = Math.max(bad*1.2, Math.max(...points.map(p=>p.bt))*1.15, 0.05);
+
+    const xMap = (t)=> 60 + ( (t - tMin) / (tMax - tMin) ) * (W-90);
+    const yMap = (bt)=> (H-40) - ( bt / btMax ) * (H-60);
+
+    // thresholds
+    drawThresholds(ctx, W, H, warn, bad, btMax);
+
+    // line
+    ctx.strokeStyle = "rgba(247,201,72,.95)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    points.forEach((p,i)=>{
+      const x=xMap(p.t), y=yMap(p.bt);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+
+    // dots
+    ctx.fillStyle = "rgba(247,201,72,.95)";
+    points.forEach(p=>{
+      const x=xMap(p.t), y=yMap(p.bt);
+      ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+    });
+
+    // y scale marks
+    ctx.fillStyle = "rgba(154,164,178,.95)";
+    ctx.font = "11px system-ui";
+    for(let i=0;i<=5;i++){
+      const bt = (btMax*(5-i)/5);
+      const y = 20 + i*(H-60)/5;
+      ctx.fillText(bt.toFixed(3), 10, y+4);
+    }
+
+    // x labels (start/end time)
+    const d0 = new Date(tMin), d1 = new Date(tMax);
+    ctx.fillText(`${pad2(d0.getHours())}:${pad2(d0.getMinutes())}`, 60, H-16);
+    ctx.fillText(`${pad2(d1.getHours())}:${pad2(d1.getMinutes())}`, W-70, H-16);
+  }
+
+  function drawThresholds(ctx, W, H, warn, bad, btMaxOverride){
+    const btMax = btMaxOverride ?? Math.max(bad*1.2, 0.05);
+    const yMap = (bt)=> (H-40) - ( bt / btMax ) * (H-60);
+
+    // warn line
+    ctx.strokeStyle = "rgba(251,191,36,.7)";
+    ctx.setLineDash([6,6]);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(60, yMap(warn));
+    ctx.lineTo(W-20, yMap(warn));
+    ctx.stroke();
+    ctx.fillStyle = "rgba(251,191,36,.9)";
+    ctx.setLineDash([]);
+    ctx.font = "11px system-ui";
+    ctx.fillText(`Warn ${warn.toFixed(3)}`, W-92, yMap(warn)-6);
+
+    // bad line
+    ctx.strokeStyle = "rgba(251,113,133,.7)";
+    ctx.setLineDash([6,6]);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(60, yMap(bad));
+    ctx.lineTo(W-20, yMap(bad));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "rgba(251,113,133,.9)";
+    ctx.fillText(`Bad ${bad.toFixed(3)}`, W-86, yMap(bad)-6);
+  }
+
+  // ====== Report view ======
+  let lastReport = null;
+
+  function makeReport(){
+    const colId = $("rColumn").value;
+    const days = Math.max(1, Math.floor(safeNum($("rDays").value) || 7));
+    const col = state.columns.find(c=>c.id===colId);
+    const carbonKg = Number(col?.carbonKg);
+
+    // date range
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(today.getDate() - (days-1));
+
+    // group readings by day
+    const byDay = new Map(); // ymd -> readings[]
+    state.readings
+      .filter(r=>r.columnId===colId)
+      .forEach(r=>{
+        const d = new Date(r.dtISO);
+        if(d < start || d > today) return;
+        const key = ymd(d);
+        if(!byDay.has(key)) byDay.set(key, []);
+        byDay.get(key).push(r);
+      });
+
+    // compute daily rows
+    const daily = [];
+    const keys = Array.from(byDay.keys()).sort();
+    keys.forEach(k=>{
+      const rs = byDay.get(k).sort((a,b)=> new Date(a.dtISO)-new Date(b.dtISO));
+      const intervals = computeIntervals(rs);
+      const sum = summarizeIntervals(intervals, carbonKg);
+      daily.push({
+        day:k,
+        au: sum.totalAu,
+        avgRec: sum.avgRec,
+        avgDC: sum.avgDC,
+        avgBT: sum.avgBT,
+        n: rs.length
+      });
+    });
+
+    // totals
+    const totalAu = daily.reduce((s,x)=> s + (Number.isFinite(x.au)?x.au:0), 0);
+    const avgRec = avg(daily.map(x=>x.avgRec));
+    const avgDC  = avg(daily.map(x=>x.avgDC));
+    const avgBT  = avg(daily.map(x=>x.avgBT));
+    const loadingAdded = (Number.isFinite(carbonKg) && carbonKg>0) ? totalAu / carbonKg : NaN;
+
+    lastReport = {colName: col?.name ?? "Column", colId, days, daily, totalAu, avgRec, avgDC, avgBT, loadingAdded};
+
+    // summary boxes
+    const boxes = $("reportSummary").querySelectorAll(".kpi .val");
+    boxes[0].textContent = Number.isFinite(totalAu) ? totalAu.toFixed(2) : "—";
+    boxes[1].textContent = Number.isFinite(avgRec) ? avgRec.toFixed(2) : "—";
+    boxes[2].textContent = Number.isFinite(avgDC) ? avgDC.toFixed(4) : "—";
+    boxes[3].textContent = Number.isFinite(avgBT) ? avgBT.toFixed(4) : "—";
+    boxes[4].textContent = Number.isFinite(loadingAdded) ? loadingAdded.toFixed(4) : "—";
+
+    const warn = Number(state.settings.warnBT), bad = Number(state.settings.badBT);
+    const st = statusFromBT(avgBT, warn, bad);
+    const pill = $("reportStatus");
+    pill.className = `pill ${st.cls}`;
+    pill.textContent = st.label;
+
+    // table
+    const tbody = $("reportTable").querySelector("tbody");
+    tbody.innerHTML = "";
+    daily.forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${r.day}</td>
+        <td>${num(r.au,2)}</td>
+        <td>${num(r.avgRec,2)}</td>
+        <td>${num(r.avgDC,4)}</td>
+        <td>${num(r.avgBT,4)}</td>
+        <td>${r.n}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    toast("تم إنشاء التقرير ✅");
+  }
+
+  function exportReportCsv(){
+    if(!lastReport) return toast("اعمل التقرير أولاً.");
+    const rows = [
+      ["column","range_days","day","au_g","avg_recovery_pct","avg_deltaC_ppm","avg_bt","readings_count"]
+    ];
+    lastReport.daily.forEach(r=>{
+      rows.push([lastReport.colName, lastReport.days, r.day, r.au, r.avgRec, r.avgDC, r.avgBT, r.n]);
+    });
+    downloadText(`aucarbon_report_${lastReport.colName.replaceAll(" ","_")}_last_${lastReport.days}_days.csv`, toCsv(rows));
+  }
+
+  // ====== Settings modal ======
+  function openSettings(){
+    $("sWarn").value = state.settings.warnBT;
+    $("sBad").value = state.settings.badBT;
+    $("settingsModal").classList.add("show");
+  }
+  function closeSettings(){ $("settingsModal").classList.remove("show"); }
+
+  function saveSettings(){
+    const warn = safeNum($("sWarn").value);
+    const bad  = safeNum($("sBad").value);
+    if(!(Number.isFinite(warn) && Number.isFinite(bad) && warn>=0 && bad>=0 && bad>warn)){
+      toast("تأكد: حد الأحمر أكبر من الأصفر.");
+      return;
+    }
+    state.settings.warnBT = warn;
+    state.settings.badBT = bad;
+    save();
+    toast("تم حفظ الإعدادات ✅");
+    closeSettings();
+    refreshAllViews();
+  }
+
+  function addColumn(){
+    const name = $("sNewColName").value.trim();
+    const carbon = safeNum($("sNewColCarbon").value);
+    const initL = safeNum($("sNewColInitLoading").value);
+    const targetL = safeNum($("sNewColTarget").value);
+
+    if(!name) return toast("اكتب اسم الكولوم.");
+    if(!Number.isFinite(carbon) || carbon<=0) return toast("أدخل كتلة كربون صحيحة.");
+
+    state.columns.push({
+      id: cryptoRandomId(),
+      name,
+      carbonKg: carbon,
+      initLoadingGkg: Number.isFinite(initL) ? initL : 0,
+      targetLoadingGkg: Number.isFinite(targetL) ? targetL : 0
+    });
+    $("sNewColName").value = "";
+    $("sNewColCarbon").value = "";
+    $("sNewColInitLoading").value = "";
+    $("sNewColTarget").value = "";
+    save();
+    toast("تمت إضافة الكولوم ✅");
+    populateColumns();
+  }
+
+  function deleteSelectedColumn(){
+    const colId = $("qColumn").value;
+    if(state.columns.length<=1) return toast("لا يمكن حذف آخر كولوم.");
+    const col = state.columns.find(c=>c.id===colId);
+    if(!confirm(`حذف "${col?.name}"؟ سيتم مسح بياناته.`)) return;
+    state.columns = state.columns.filter(c=>c.id!==colId);
+    state.readings = state.readings.filter(r=>r.columnId!==colId);
+    save();
+    toast("تم الحذف ✅");
+    populateColumns();
+  }
+
+  function resetAll(){
+    if(!confirm("إعادة ضبط كل البيانات؟")) return;
+    localStorage.removeItem(KEY);
+    state = {
+      settings: { warnBT: 0.05, badBT: 0.20 },
+      columns: [
+        { id: cryptoRandomId(), name: "Column A", carbonKg: 500, initLoadingGkg: 0, targetLoadingGkg: 2500 }
+      ],
+      readings: []
+    };
+    save();
+    toast("تمت إعادة الضبط ✅");
+    populateColumns();
+  }
+
+  // ====== Backup modal ======
+  function openBackup(){
+    $("backupText").value = JSON.stringify(state, null, 2);
+    $("backupModal").classList.add("show");
+  }
+  function closeBackup(){ $("backupModal").classList.remove("show"); }
+  function copyBackup(){
+    navigator.clipboard.writeText($("backupText").value).then(()=>toast("تم النسخ ✅"));
+  }
+  function loadBackup(){
+    try{
+      const obj = JSON.parse($("backupText").value);
+      if(!obj || !obj.columns || !obj.readings || !obj.settings) throw new Error();
+      state = obj;
+      save();
+      toast("تم الاسترجاع ✅");
+      closeBackup();
+      populateColumns();
+    }catch(e){
+      toast("JSON غير صالح.");
+    }
+  }
+
+  // ====== Refresh all views ======
+  function refreshAllViews(){
+    // Quick: update status if fields exist
+    // Log: table + summary
+    // Breakthrough: chart
+    // Report: keep as-is until run, but update dropdowns
+    renderTodayTable();
+    renderBreakthrough();
+  }
+
+  // ====== Events ======
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.addEventListener("click", ()=> setView(t.dataset.view));
+  });
+
+  $("btnQuickCalc").addEventListener("click", runQuickCalc);
+  $("btnQuickSave").addEventListener("click", ()=>{
+    const ok = runQuickCalc();
+    if(ok) saveQuickAsReading();
+  });
+
+  $("qColumn").addEventListener("change", ()=>{
+    syncQuickCarbonFromColumn();
+  });
+
+  $("btnAddReading").addEventListener("click", addReadingFromLogForm);
+  $("btnClearShift").addEventListener("click", clearTodayForColumn);
+  $("btnDeleteSelected").addEventListener("click", deleteSelectedRows);
+  $("btnExportTodayCsv").addEventListener("click", exportTodayCsv);
+
+  $("btColumn").addEventListener("change", renderBreakthrough);
+  $("lColumn").addEventListener("change", renderTodayTable);
+
+  $("btnMakeReport").addEventListener("click", makeReport);
+  $("btnExportReportCsv").addEventListener("click", exportReportCsv);
+
+  $("btnSettings").addEventListener("click", openSettings);
+  $("btnCloseSettings").addEventListener("click", closeSettings);
+  $("btnSaveSettings").addEventListener("click", saveSettings);
+  $("btnAddColumn").addEventListener("click", addColumn);
+  $("btnDeleteColumn").addEventListener("click", deleteSelectedColumn);
+  $("btnResetAll").addEventListener("click", resetAll);
+
+  $("btnBackup").addEventListener("click", openBackup);
+  $("btnCloseBackup").addEventListener("click", closeBackup);
+  $("btnCopyBackup").addEventListener("click", copyBackup);
+  $("btnLoadBackup").addEventListener("click", loadBackup);
+
+  // ====== Init ======
+  load();
+  $("qDatetime").value = nowLocalDatetimeValue();
+  $("lDatetime").value = nowLocalDatetimeValue();
+  populateColumns();
+
+  // default flow unit can follow quick unit
+  $("qFlowUnit").value = "m3h";
+  $("lFlowUnit").value = "m3h";
+
+  // keep carbon kg synced in quick
+  syncQuickCarbonFromColumn();
+
+  // initial calc display
+  refreshAllViews();
+  toast("جاهز ✅ أدخل بياناتك وابدأ.");
+
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
+</body>
+</html>

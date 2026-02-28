@@ -1,8 +1,13 @@
 {
   "name": "AuCarbon Column",
   "short_name": "AuColumn",
-  "start_url": "./index.html",
+  "start_url": "/aucarbon-pwa/index.html",
+  "scope": "/aucarbon-pwa/",
   "display": "standalone",
   "background_color": "#070b16",
-  "theme_color": "#070b16"
+  "theme_color": "#070b16",
+  "icons": [
+    { "src": "/aucarbon-pwa/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/aucarbon-pwa/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
 }

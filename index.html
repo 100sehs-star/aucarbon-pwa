@@ -625,13 +625,23 @@
     return Number.isFinite(n) ? n : NaN;
   }
 
-  function flowToM3h(flow, unit){
-    // m3/h stays, L/min -> m3/h
-    if(unit === "m3h") return flow;
-    // L/min * 60 min/h = L/h; /1000 = m3/h
+  
+    function flowToM3h(flow, unit){
+
+  if(unit === "m3h") {
+    return flow;
+  }
+
+  if(unit === "m3day") {
+    return flow / 24;
+  }
+
+  if(unit === "lmin") {
     return flow * 60 / 1000;
   }
 
+  return flow;
+}
   function computeAuCapturedG(flowValue, flowUnit, cin, cout, hours){
     const Qm3h = flowToM3h(flowValue, flowUnit);
     const dC = (cin - cout);
@@ -1386,4 +1396,5 @@ if ("serviceWorker" in navigator) {
 </body>
 
 </html>
+
 

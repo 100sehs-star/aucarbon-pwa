@@ -885,7 +885,7 @@
         <td><input type="checkbox" data-id="${r.id}"></td>
         <td>${formatLocal(r.dtISO)}</td>
         <td>${num(r.flow,3)}</td>
-        <td>${r.flowUnit==="m3h" ? "m³/h" : "L/min"}</td>
+        <td>${r.flowUnit==="m3h" ? "m³/h" : r.flowUnit==="m3day" ? "m³/day" : "L/min"}</td>
         <td>${num(r.cin,4)}</td>
         <td>${num(r.cout,4)}</td>
         <td>${num(dC,4)}</td>
@@ -1397,6 +1397,7 @@ if ("serviceWorker" in navigator) {
 </body>
 
 </html>
+
 
 
 
